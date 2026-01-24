@@ -226,7 +226,7 @@ class MainWindow(QtWidgets.QWidget):
             on_key=self._handle_key,
         )
         self._keyer.start()
-        self._midi = MidiKeyer(config.midi_device, self._handle_paddles)
+        self._midi = MidiKeyer(config.midi_device, self._handle_paddles, auto_map=False)
         self._midi.start()
         self._midi.send_keyer_type(KeyerType(config.keyer_type))
         self._midi.send_wpm(config.wpm)

@@ -37,6 +37,8 @@ class MidiKeyer:
         self._output: Optional[mido.ports.BaseOutput] = None
         self._dit_down = False
         self._dah_down = False
+        self._last_dit_source: Optional[str] = None
+        self._last_dah_source: Optional[str] = None
         self._auto_notes: list[int] = []
         self._auto_ccs: list[int] = []
         self._running = False
@@ -210,8 +212,10 @@ class MidiKeyer:
                         self._mapping.dah_cc = message.control
             if self._mapping.dit_cc is not None and message.control == self._mapping.dit_cc:
                 self._dit_down = is_down
+                self._last_dit_source = "cc"
             elif self._mapping.dah_cc is not None and message.control == self._mapping.dah_cc:
                 self._dah_down = is_down
+                self._last_dah_source = "cc"
             self._on_paddle(self._dit_down, self._dah_down)
             return
         note = message.note
@@ -229,8 +233,10 @@ class MidiKeyer:
                     self._mapping.dah_note = note
         if note == self._mapping.dit_note:
             self._dit_down = is_down
+            self._last_dit_source = "note"
         elif note == self._mapping.dah_note:
             self._dah_down = is_down
+            self._last_dah_source = "note"
         elif note == self._mapping.straight_note:
             self._dit_down = is_down
             self._dah_down = is_down
