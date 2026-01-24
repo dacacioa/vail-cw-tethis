@@ -126,6 +126,10 @@ class MidiKeyer:
         for name in outputs:
             if device_name.lower() in name.lower():
                 return name
+        base_name = device_name.rsplit(" ", 1)[0].lower()
+        for name in outputs:
+            if base_name and base_name in name.lower():
+                return name
         return ""
 
     def _send_midi_mode(self) -> None:
