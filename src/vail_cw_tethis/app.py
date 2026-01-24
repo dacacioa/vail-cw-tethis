@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtWidgets
 
 from vail_cw_tethis.audio import AudioEngine, AudioSettings
 from vail_cw_tethis.cat import CatController, CatSettings
@@ -14,7 +14,6 @@ class MainWindow(QtWidgets.QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Vail-CW Tethis")
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self._config = load_config()
         self._audio: AudioEngine | None = None
         self._midi: MidiKeyer | None = None
@@ -58,9 +57,6 @@ class MainWindow(QtWidgets.QWidget):
         self.route_combo.addItems(["OutputOnly", "LocalOnly", "Both"])
         self.mix_combo = QtWidgets.QComboBox()
         self.mix_combo.addItems(["AlwaysMix", "CwMutesMic", "PushToTalkVoice"])
-        self.keyboard_keyer_check = QtWidgets.QCheckBox("Enable keyboard keyer")
-        self.keyboard_key_combo = QtWidgets.QComboBox()
-        self.keyboard_key_combo.addItems(["Ctrl", "Alt", "Shift", "Space"])
 
         self.cat_port_edit = QtWidgets.QLineEdit()
         self.cat_baud_spin = QtWidgets.QSpinBox()
@@ -85,8 +81,6 @@ class MainWindow(QtWidgets.QWidget):
         form.addRow("Local monitor volume", self.local_vol_spin)
         form.addRow("Sidetone route", self.route_combo)
         form.addRow("Mix mode", self.mix_combo)
-        form.addRow("Keyboard keyer", self.keyboard_keyer_check)
-        form.addRow("Keyboard key", self.keyboard_key_combo)
         form.addRow("CAT COM port", self.cat_port_edit)
         form.addRow("CAT baudrate", self.cat_baud_spin)
         form.addRow("PTT mode", self.ptt_mode_combo)
@@ -123,7 +117,7 @@ class MainWindow(QtWidgets.QWidget):
 
         midi_names = MidiKeyer.list_inputs()
         self._populate_combo(self.midi_combo, midi_names)
-        mic_devices = ["(None)"] + AudioEngine.list_devices("input")
+        mic_devices = AudioEngine.list_devices("input")
         out_devices = AudioEngine.list_devices("output")
         self._populate_combo(self.mic_combo, mic_devices)
         self._populate_combo(self.output_combo, out_devices)
@@ -137,7 +131,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def _load_config(self, config: AppConfig) -> None:
         self.midi_combo.setCurrentText(config.midi_device)
-        self.mic_combo.setCurrentText(config.audio_input_device or "(None)")
+        self.mic_combo.setCurrentText(config.audio_input_device)
         self.output_combo.setCurrentText(config.audio_output_device)
         self.keyer_combo.setCurrentText(config.keyer_type)
         self.wpm_spin.setValue(config.wpm)
@@ -149,8 +143,6 @@ class MainWindow(QtWidgets.QWidget):
         self.local_vol_spin.setValue(config.local_monitor_volume)
         self.route_combo.setCurrentText(config.sidetone_route)
         self.mix_combo.setCurrentText(config.mix_mode)
-        self.keyboard_keyer_check.setChecked(config.keyboard_keyer_enabled)
-        self.keyboard_key_combo.setCurrentText(config.keyboard_key)
         self.cat_port_edit.setText(config.cat.com_port)
         self.cat_baud_spin.setValue(config.cat.baudrate)
         self.ptt_mode_combo.setCurrentText(config.cat.ptt_mode)
@@ -159,7 +151,7 @@ class MainWindow(QtWidgets.QWidget):
     def _collect_config(self) -> AppConfig:
         return AppConfig(
             midi_device=self.midi_combo.currentText(),
-            audio_input_device=self._normalize_optional(self.mic_combo.currentText()),
+            audio_input_device=self.mic_combo.currentText(),
             audio_output_device=self.output_combo.currentText(),
             keyer_type=self.keyer_combo.currentText(),
             wpm=self.wpm_spin.value(),
@@ -171,8 +163,6 @@ class MainWindow(QtWidgets.QWidget):
             local_monitor_volume=self.local_vol_spin.value(),
             sidetone_route=self.route_combo.currentText(),
             mix_mode=self.mix_combo.currentText(),
-            keyboard_keyer_enabled=self.keyboard_keyer_check.isChecked(),
-            keyboard_key=self.keyboard_key_combo.currentText(),
             cat=CatConfig(
                 com_port=self.cat_port_edit.text(),
                 baudrate=self.cat_baud_spin.value(),
@@ -244,20 +234,6 @@ class MainWindow(QtWidgets.QWidget):
         if self._keyer:
             self._keyer.set_paddles(dit, dah)
 
-    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
-        if event.isAutoRepeat():
-            return
-        if self.keyboard_keyer_check.isChecked() and self._matches_keyboard_key(event.key()):
-            self._handle_paddles(True, True)
-        super().keyPressEvent(event)
-
-    def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
-        if event.isAutoRepeat():
-            return
-        if self.keyboard_keyer_check.isChecked() and self._matches_keyboard_key(event.key()):
-            self._handle_paddles(False, False)
-        super().keyReleaseEvent(event)
-
     def _handle_key(self, state: bool) -> None:
         if self._audio:
             self._audio.set_key_down(state)
@@ -281,24 +257,6 @@ class MainWindow(QtWidgets.QWidget):
         config = self._collect_config()
         save_config(config)
         self._config = config
-
-    @staticmethod
-    def _normalize_optional(value: str) -> str:
-        if value.strip() == "(None)":
-            return ""
-        return value
-
-    def _matches_keyboard_key(self, key: int) -> bool:
-        key_name = self.keyboard_key_combo.currentText()
-        if key_name == "Ctrl":
-            return key == QtCore.Qt.Key_Control
-        if key_name == "Alt":
-            return key == QtCore.Qt.Key_Alt
-        if key_name == "Shift":
-            return key == QtCore.Qt.Key_Shift
-        if key_name == "Space":
-            return key == QtCore.Qt.Key_Space
-        return False
 
 
 def main() -> None:
