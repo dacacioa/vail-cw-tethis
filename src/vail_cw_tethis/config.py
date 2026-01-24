@@ -31,8 +31,6 @@ class AppConfig:
     local_monitor_volume: float = 0.4
     sidetone_route: str = "Both"  # OutputOnly, LocalOnly, Both
     mix_mode: str = "AlwaysMix"  # AlwaysMix, CwMutesMic, PushToTalkVoice
-    keyboard_keyer_enabled: bool = False
-    keyboard_key: str = "Ctrl"
     cat: CatConfig = field(default_factory=CatConfig)
 
 
@@ -62,8 +60,6 @@ def load_config() -> AppConfig:
         local_monitor_volume=float(data.get("local_monitor_volume", 0.4)),
         sidetone_route=data.get("sidetone_route", "Both"),
         mix_mode=data.get("mix_mode", "AlwaysMix"),
-        keyboard_keyer_enabled=bool(data.get("keyboard_keyer_enabled", False)),
-        keyboard_key=data.get("keyboard_key", "Ctrl"),
         cat=CatConfig(
             com_port=cat_data.get("com_port", ""),
             baudrate=int(cat_data.get("baudrate", 9600)),
