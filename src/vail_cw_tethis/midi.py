@@ -90,6 +90,7 @@ class MidiKeyer:
         if not device:
             self._logger.warning("No MIDI input devices found.")
             return
+        self._maybe_set_default_mapping(device)
         try:
             self._input = mido.open_input(device, callback=self._handle_message)
         except OSError as exc:
@@ -112,6 +113,13 @@ class MidiKeyer:
             self.send_wpm(self._last_wpm)
         if self._last_sidetone_freq:
             self.send_sidetone_frequency(self._last_sidetone_freq)
+
+    def _maybe_set_default_mapping(self, device_name: str) -> None:
+        name = device_name.lower()
+        if "vail" in name or "seeed xiao" in name:
+            if self._mapping.dit_note == 60 and self._mapping.dah_note == 61:
+                self._mapping.dit_note = 1
+                self._mapping.dah_note = 2
 
     def _close_ports(self) -> None:
         if self._input:
