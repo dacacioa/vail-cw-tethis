@@ -117,7 +117,7 @@ class MainWindow(QtWidgets.QWidget):
 
         midi_names = MidiKeyer.list_inputs()
         self._populate_combo(self.midi_combo, midi_names)
-        mic_devices = ["(None)"] + AudioEngine.list_devices("input")
+        mic_devices = AudioEngine.list_devices("input")
         out_devices = AudioEngine.list_devices("output")
         self._populate_combo(self.mic_combo, mic_devices)
         self._populate_combo(self.output_combo, out_devices)
@@ -131,7 +131,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def _load_config(self, config: AppConfig) -> None:
         self.midi_combo.setCurrentText(config.midi_device)
-        self.mic_combo.setCurrentText(config.audio_input_device or "(None)")
+        self.mic_combo.setCurrentText(config.audio_input_device)
         self.output_combo.setCurrentText(config.audio_output_device)
         self.keyer_combo.setCurrentText(config.keyer_type)
         self.wpm_spin.setValue(config.wpm)
@@ -151,7 +151,7 @@ class MainWindow(QtWidgets.QWidget):
     def _collect_config(self) -> AppConfig:
         return AppConfig(
             midi_device=self.midi_combo.currentText(),
-            audio_input_device=self._normalize_optional(self.mic_combo.currentText()),
+            audio_input_device=self.mic_combo.currentText(),
             audio_output_device=self.output_combo.currentText(),
             keyer_type=self.keyer_combo.currentText(),
             wpm=self.wpm_spin.value(),
@@ -257,12 +257,6 @@ class MainWindow(QtWidgets.QWidget):
         config = self._collect_config()
         save_config(config)
         self._config = config
-
-    @staticmethod
-    def _normalize_optional(value: str) -> str:
-        if value.strip() == "(None)":
-            return ""
-        return value
 
 
 def main() -> None:
