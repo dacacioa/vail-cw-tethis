@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vail-cw-tethis"
+version = "0.1.1"
+description = "Cross-platform Vail-CW desktop app for Thetis (CAT + VAC)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "Vail-CW" }
+]
+dependencies = [
+  "mido>=1.3.0",
+  "python-rtmidi>=1.5.8",
+  "sounddevice>=0.4.6",
+  "numpy>=1.24",
+  "pyserial>=3.5",
+  "platformdirs>=4.2.0",
+  "PySide6>=6.5.0"
+]
+
+[project.scripts]
+vail-cw-tethis = "vail_cw_tethis.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
