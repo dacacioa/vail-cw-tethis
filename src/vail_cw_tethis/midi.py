@@ -126,7 +126,7 @@ class MidiKeyer:
         for name in outputs:
             if device_name.lower() in name.lower():
                 return name
-        return outputs[0] if outputs else ""
+        return ""
 
     def _send_midi_mode(self) -> None:
         if not self._output:
