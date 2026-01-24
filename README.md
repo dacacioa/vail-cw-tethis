@@ -27,7 +27,7 @@ Configuration is stored in your user config directory (`vail-cw-tethis/config.js
 The following settings are persisted:
 
 - MIDI device
-- Audio input device (mic)
+- Audio input device (mic, or `None` to disable)
 - Audio output device (VAC)
 - Keyer type
 - WPM
@@ -39,7 +39,11 @@ The following settings are persisted:
 - Local monitor volume
 - Sidetone route
 - Mix mode
+- Keyboard keyer enabled
+- Keyboard key
 - CAT: COM port, baudrate, PTT mode (CAT/RTS/DTR), TX hang time
+
+Keyboard keyer input works when the app window has focus (useful for adapters that emulate a keyboard key). 
 
 ## Thetis setup
 

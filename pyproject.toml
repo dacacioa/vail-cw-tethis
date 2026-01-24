@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vail-cw-tethis"
-version = "0.1.0"
+version = "0.1.1"
 description = "Cross-platform Vail-CW desktop app for Thetis (CAT + VAC)."
 readme = "README.md"
 requires-python = ">=3.9"
