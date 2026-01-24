@@ -27,7 +27,7 @@ Configuration is stored in your user config directory (`vail-cw-tethis/config.js
 The following settings are persisted:
 
 - MIDI device
-- Audio input device (mic, or `None` to disable)
+- Audio input device (mic)
 - Audio output device (VAC)
 - Keyer type
 - WPM

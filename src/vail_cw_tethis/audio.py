@@ -28,7 +28,7 @@ class AudioEngine:
     ) -> None:
         self._settings = settings
         self._on_ptt_change = on_ptt_change
-        self._stream: Optional[sd.Stream | sd.OutputStream] = None
+        self._stream: Optional[sd.Stream] = None
         self._phase = 0.0
         self._key_down = False
         self._ptt_active = False
@@ -54,26 +54,16 @@ class AudioEngine:
             self._on_ptt_change(state)
 
     def start(self) -> None:
-        input_device = self._normalize_device(self._settings.input_device)
+        input_device = self._settings.input_device or None
         output_device = self._settings.output_device or None
-        if input_device:
-            self._stream = sd.Stream(
-                samplerate=48000,
-                blocksize=256,
-                dtype="float32",
-                channels=(1, 1),
-                device=(input_device, output_device),
-                callback=self._callback,
-            )
-        else:
-            self._stream = sd.OutputStream(
-                samplerate=48000,
-                blocksize=256,
-                dtype="float32",
-                channels=1,
-                device=output_device,
-                callback=self._output_callback,
-            )
+        self._stream = sd.Stream(
+            samplerate=48000,
+            blocksize=256,
+            dtype="float32",
+            channels=1,
+            device=(input_device, output_device),
+            callback=self._callback,
+        )
         self._stream.start()
 
     def stop(self) -> None:
@@ -89,18 +79,6 @@ class AudioEngine:
             settings = self._settings
         sidetone = self._generate_sidetone(frames, settings.sidetone_frequency)
         mic = indata.copy() if indata is not None else np.zeros((frames, 1), dtype=np.float32)
-        outdata[:] = self._mix_audio(mic, sidetone, settings)
-
-    def _output_callback(self, outdata, frames, time_info, status) -> None:
-        if status:
-            pass
-        with self._lock:
-            settings = self._settings
-        sidetone = self._generate_sidetone(frames, settings.sidetone_frequency)
-        mic = np.zeros((frames, 1), dtype=np.float32)
-        outdata[:] = self._mix_audio(mic, sidetone, settings)
-
-    def _mix_audio(self, mic: np.ndarray, sidetone: np.ndarray, settings: AudioSettings) -> np.ndarray:
         keying = self._key_down
         mix_mode = settings.mix_mode
 
@@ -118,13 +96,7 @@ class AudioEngine:
             sidetone_gain = settings.sidetone_volume + settings.local_monitor_volume
 
         audio_mix = mic * mic_gain + sidetone * sidetone_gain
-        return np.clip(audio_mix, -1.0, 1.0)
-
-    @staticmethod
-    def _normalize_device(name: str) -> Optional[str]:
-        if not name or name.strip() == "(None)":
-            return None
-        return name
+        outdata[:] = np.clip(audio_mix, -1.0, 1.0)
 
     def _generate_sidetone(self, frames: int, frequency: float) -> np.ndarray:
         if not self._key_down:
