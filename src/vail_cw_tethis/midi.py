@@ -38,6 +38,7 @@ class MidiKeyer:
         self._dit_down = False
         self._dah_down = False
         self._auto_notes: list[int] = []
+        self._auto_ccs: list[int] = []
         self._running = False
         self._monitor_thread: Optional[threading.Thread] = None
         self._logger = logging.getLogger(__name__)
@@ -192,6 +193,13 @@ class MidiKeyer:
             return
         if message.type == "control_change":
             is_down = message.value > 0
+            if self._auto_map and message.control not in (self._mapping.dit_cc, self._mapping.dah_cc):
+                if message.control not in self._auto_ccs and len(self._auto_ccs) < 2:
+                    self._auto_ccs.append(message.control)
+                    if len(self._auto_ccs) == 1:
+                        self._mapping.dit_cc = message.control
+                    elif len(self._auto_ccs) == 2:
+                        self._mapping.dah_cc = message.control
             if self._mapping.dit_cc is not None and message.control == self._mapping.dit_cc:
                 self._dit_down = is_down
             elif self._mapping.dah_cc is not None and message.control == self._mapping.dah_cc:
