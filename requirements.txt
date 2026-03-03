@@ -1,0 +1,6 @@
+mido
+python-rtmidi
+sounddevice
+numpy
+pyserial
+pygame
