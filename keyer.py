@@ -223,8 +223,11 @@ class KeyerEngine:
         duration = dit_len if element == "dit" else dah_len
         self._element_in_progress = True
         self._squeeze_during_element = False
+        on_ts = time.perf_counter()
         self._set_keying(True)
-        self._sleep_with_checks(duration)
+        # Keep element timing anchored even if the callback adds overhead.
+        self._sleep_with_checks(max(0.0, duration - (time.perf_counter() - on_ts)))
+        off_ts = time.perf_counter()
         self._set_keying(False)
         self._element_in_progress = False
         with self._lock:
@@ -237,4 +240,5 @@ class KeyerEngine:
             ):
                 opposite = "dah" if element == "dit" else "dit"
                 self._memory[opposite] = True
-        self._sleep_with_checks(gap)
+        # Same compensation for inter-element gap.
+        self._sleep_with_checks(max(0.0, gap - (time.perf_counter() - off_ts)))

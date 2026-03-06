@@ -59,6 +59,9 @@ class CtrlKeyboardInput:
 
     def handle_key_event(self, key: str, keycode: int, keysym_num: int, pressed: bool) -> None:
         """Fast path from UI key events when the app window has focus."""
+        with self._lock:
+            if not self._enabled:
+                return
         side, confident = self._resolve_event_side(key, keycode, keysym_num)
         if not side:
             return
@@ -77,7 +80,7 @@ class CtrlKeyboardInput:
                 if self._event_dah and pressed:
                     return
                 if pressed:
-                    if confident:
+                    if confident or not self._is_right_alt_pressed():
                         # Trusted left-control event: apply immediately.
                         self._pending_left_press = False
                         self._pending_left_deadline = 0.0
@@ -143,6 +146,14 @@ class CtrlKeyboardInput:
 
     def _is_available(self) -> bool:
         return self._user32 is not None
+
+    def _is_right_alt_pressed(self) -> bool:
+        if not self._is_available():
+            return False
+        try:
+            return bool(self._user32.GetAsyncKeyState(VK_RMENU) & 0x8000)
+        except Exception:
+            return False
 
     def _status_label(self) -> str:
         if not self._is_available():

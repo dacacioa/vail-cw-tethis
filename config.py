@@ -18,8 +18,9 @@ class AppConfig:
     input_mode: str = "CTRL"
     midi_device: str = ""
     midi_channel: int = 1
-    midi_note_dit: int = 48
-    midi_note_dah: int = 50
+    # Vail passthrough raw paddles: DIT=0, DAH=1.
+    midi_note_dit: int = 0
+    midi_note_dah: int = 1
     audio_output_device: str = ""
     keyer_type: str = "IambicB"
     wpm: float = 20.0
@@ -64,6 +65,12 @@ class AppConfig:
             low, high = high, low
         filtered["decode_audio_tone_low_freq"] = low
         filtered["decode_audio_tone_high_freq"] = high
+        # Migrate legacy defaults to passthrough raw notes.
+        midi_dit = int(filtered.get("midi_note_dit", 0))
+        midi_dah = int(filtered.get("midi_note_dah", 1))
+        if (midi_dit, midi_dah) in {(48, 50), (50, 48)}:
+            filtered["midi_note_dit"] = 0
+            filtered["midi_note_dah"] = 1
         return cls(**filtered)
 
 
