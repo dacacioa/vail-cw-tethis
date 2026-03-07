@@ -1,16 +1,16 @@
 {
-  "audio_output_device": "9: Altavoces (Yeti Stereo Micropho",
+  "audio_output_device": "9: Microsoft Sound Mapper - Output",
   "cat_baud": 19200,
   "cat_port": "COM15",
   "channels": 1,
   "decode_audio_enabled": false,
-  "decode_audio_input_device": "1: Microphone (Yeti Stereo Microph",
+  "decode_audio_input_device": "0: Microsoft Sound Mapper - Input",
   "decode_audio_tone_freq": 640.0,
   "decode_audio_tone_high_freq": 820.0,
   "decode_audio_tone_low_freq": 460.0,
   "decode_font_size": 18,
   "dit_dah_ratio": 3.0,
-  "input_mode": "MIDI",
+  "input_mode": "CTRL",
   "keyer_type": "IambicA",
   "midi_channel": 16,
   "midi_device": "Seeed XIAO M0 1",
@@ -28,5 +28,5 @@
   "thetis_ptt_line": "None",
   "tx_hang_time": 0.0,
   "weighting": 50.0,
-  "wpm": 25.0
+  "wpm": 20.0
 }
